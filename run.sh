@@ -42,6 +42,8 @@
 #   AD_BINPASSWORD              Password used to query your AD in clear text
 #   AD_USERBASEDN               Base DN to search for users, this is the OU which recursive searches for users will be performed on, e.g. "ou=People,dc=test1,dc=example,dc=com"
 #   AD_ROLEBASEDN               Base DN for role membership search, this is where your "rundeck" AD user group is, e.g. "ou=Groups,dc=test1,dc=example,dc=com".
+#   AD_SUPPLEMENTALROLES        Comma-separated list of role names (defaults to "admin, user"). All of the given role names will be automatically added to authenticated users. You can use this to provide a "default" role or roles for all users.
+#   AD_MULTIAUTH                Enable multiple authentication modules, Ldap --> PropertyFile.
 
 config_properties=$RDECK_BASE/server/config/rundeck-config.properties
 realm_properties=$RDECK_BASE/server/config/realm.properties
@@ -172,7 +174,7 @@ if [ ! -f "${initfile}" ]; then
 		echo "==> Mail Configuration"
 		config_mail
 	fi
-	
+
 	touch ${initfile}
 fi
 
@@ -203,16 +205,22 @@ if ! [ -z ${AD_HOST} ]; then
 	# https://meinit.nl/connect-rundeck-active-directory
 	# https://runops.wordpress.com/2015/11/20/configure-rundeck-to-use-active-directory-authentication/
 	# http://www.techpaste.com/2015/06/rundeck-active-directory-integration-steps/
-	sed -i "s/<AD_HOST>/${AD_HOST}/" $RDECK_BASE/server/config/jaas-activedirectory.conf
-	sed -i "s/<AD_PORT>/${AD_PORT:-389}/" $RDECK_BASE/server/config/jaas-activedirectory.conf
-	
-	sed -i "s/<AD_BINDN>/${AD_BINDN}/" $RDECK_BASE/server/config/jaas-activedirectory.conf
-	sed -i "s/<AD_BINPASSWORD>/${AD_BINPASSWORD}/" $RDECK_BASE/server/config/jaas-activedirectory.conf
-	sed -i "s/<AD_USERBASEDN>/${AD_USERBASEDN}/" $RDECK_BASE/server/config/jaas-activedirectory.conf
-	sed -i "s/<AD_ROLEBASEDN>/${AD_ROLEBASEDN}/" $RDECK_BASE/server/config/jaas-activedirectory.conf
-	
-	params="$params -Dloginmodule.conf.name=jaas-activedirectory.conf "
-	params="$params -Dloginmodule.name=activedirectory "
+	sed -i "s/<AD_HOST>/${AD_HOST}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+	sed -i "s/<AD_PORT>/${AD_PORT:-389}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+
+	sed -i "s/<AD_BINDN>/${AD_BINDN}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+	sed -i "s/<AD_BINPASSWORD>/${AD_BINPASSWORD}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+	sed -i "s/<AD_USERBASEDN>/${AD_USERBASEDN}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+	sed -i "s/<AD_ROLEBASEDN>/${AD_ROLEBASEDN}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+	sed -i "s/<AD_SUPPLEMENTALROLES>/${AD_SUPPLEMENTALROLES:-admin, user}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+
+	if [ "${AD_MULTIAUTH}" == "true" ]; then
+		params="$params -Dloginmodule.conf.name=jaas-multiauth.conf "
+		params="$params -Dloginmodule.name=multiauth "
+	else
+		params="$params -Dloginmodule.conf.name=jaas-activedirectory.conf "
+		params="$params -Dloginmodule.name=activedirectory "
+	fi
 fi
 
 params="$params -jar $RDECK_JAR --skipinstall"
