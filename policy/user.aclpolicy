@@ -1,0 +1,30 @@
+description: User ACL
+context:
+  project: '.*'
+for:
+  resource:
+    - equals:
+        kind: 'node'
+      allow: [read,refresh]
+    - equals:
+        kind: 'event'
+      allow: [read,create]
+  job:
+    - allow: [read,run,kill]
+  node:
+    - allow: [read,run,refresh]
+by:
+  group: user
+
+---
+
+description: User ACL
+context:
+  application: rundeck
+for:
+  project:
+    - match:
+        name: '.*'
+      allow: [read]
+by:
+  group: user

@@ -119,6 +119,8 @@ docker run -d \
 	-e AD_BINPASSWORD=mypassword \
 	-e AD_USERBASEDN="DC=example,DC=com" \
 	-e AD_ROLEBASEDN="CN=example_developer,OU=ExampleOU,DC=example,DC=com" \
+	-e AD_SUPPLEMENTALROLES="user" \
+	-e AD_ADMINROLES="adgroup1,adgroup2" \
 	--name rundeck -h rundeck \
 	rundeck
 ```
@@ -168,6 +170,7 @@ ACTIVE DIRECTORY SETTINGS
    AD_USERBASEDN               Base DN to search for users, this is the OU which recursive searches for users will be performed on, e.g. "ou=People,dc=test1,dc=example,dc=com"
    AD_ROLEBASEDN               Base DN for role membership search, this is where your "rundeck" AD user group is, e.g. "ou=Groups,dc=test1,dc=example,dc=com".
    AD_SUPPLEMENTALROLES        Comma-separated list of role names (defaults to "admin, user"). All of the given role names will be automatically added to authenticated users. You can use this to provide a "default" role or roles for all users.
+   AD_ADMINROLES               Comma-separated list of admin role names (defaults to ""). All of the given role names will be automatically added to admin group.
    AD_MULTIAUTH                Enable multiple authentication modules, Ldap --> PropertyFile.
 
 ```

@@ -10,6 +10,12 @@ RUN     apk add --update openjdk8-jre bash curl ca-certificates openssh-client a
         mkdir -p $RDECK_BASE && \
         rm -Rf /var/cache/apk/*
 
+# Plugins
+## slack/mattermos incoming webhook plugin
+ADD     https://github.com/higanworks/rundeck-slack-incoming-webhook-plugin/releases/download/v0.6.dev/rundeck-slack-incoming-webhook-plugin-0.6.jar $RDECK_BASE/libext/rundeck-slack-incoming-webhook-plugin-0.6.jar
+## WinRM plugin
+ADD     https://github.com/NetDocuments/rd-winrm-plugin/archive/1.5.1.zip $RDECK_BASE/libext/rd-winrm-plugin-1.5.1.zip
+
 COPY    run.sh /bin/rundeck
 RUN     chmod 0755 /bin/rundeck
 
@@ -19,13 +25,11 @@ RUN     mkdir -p $RDECK_BASE/ssl
 
 # Active Directory integration
 COPY    jaas-activedirectory.conf $RDECK_BASE/server/config/jaas-activedirectory.conf
-COPY    jaas-multiauth.conf $RDECK_BASE/server/config/jaas-multiauth.conf
+COPY    jaas-multiauth.conf       $RDECK_BASE/server/config/jaas-multiauth.conf
 
-# Plugins
-## slack/mattermos incoming webhook plugin
-ADD https://github.com/higanworks/rundeck-slack-incoming-webhook-plugin/releases/download/v0.6.dev/rundeck-slack-incoming-webhook-plugin-0.6.jar $RDECK_BASE/libext/rundeck-slack-incoming-webhook-plugin-0.6.jar
-## WinRM plugin
-ADD https://github.com/NetDocuments/rd-winrm-plugin/archive/1.5.1.zip $RDECK_BASE/libext/rd-winrm-plugin-1.5.1.zip
+# Acl policy files
+COPY    policy/user.aclpolicy             $RDECK_BASE/etc/user.aclpolicy
+COPY    policy/adadmin.aclpolicy.template $RDECK_BASE/etc/adadmin.aclpolicy.template
 
 # install dir
 # ssh-keys

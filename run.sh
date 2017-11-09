@@ -42,7 +42,8 @@
 #   AD_BINPASSWORD              Password used to query your AD in clear text
 #   AD_USERBASEDN               Base DN to search for users, this is the OU which recursive searches for users will be performed on, e.g. "ou=People,dc=test1,dc=example,dc=com"
 #   AD_ROLEBASEDN               Base DN for role membership search, this is where your "rundeck" AD user group is, e.g. "ou=Groups,dc=test1,dc=example,dc=com".
-#   AD_SUPPLEMENTALROLES        Comma-separated list of role names (defaults to "admin, user"). All of the given role names will be automatically added to authenticated users. You can use this to provide a "default" role or roles for all users.
+#   AD_SUPPLEMENTALROLES        Comma-separated list of role names (defaults to "user"). All of the given role names will be automatically added to authenticated users. You can use this to provide a "default" role or roles for all users.
+#   AD_ADMINROLES               Comma-separated list of admin role names (defaults to ""). All of the given role names will be automatically added to admin group.
 #   AD_MULTIAUTH                Enable multiple authentication modules, Ldap --> PropertyFile.
 
 config_properties=$RDECK_BASE/server/config/rundeck-config.properties
@@ -212,7 +213,12 @@ if ! [ -z ${AD_HOST} ]; then
 	sed -i "s/<AD_BINPASSWORD>/${AD_BINPASSWORD}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
 	sed -i "s/<AD_USERBASEDN>/${AD_USERBASEDN}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
 	sed -i "s/<AD_ROLEBASEDN>/${AD_ROLEBASEDN}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
-	sed -i "s/<AD_SUPPLEMENTALROLES>/${AD_SUPPLEMENTALROLES:-admin, user}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+	sed -i "s/<AD_SUPPLEMENTALROLES>/${AD_SUPPLEMENTALROLES:-user}/" $RDECK_BASE/server/config/jaas-{activedirectory,multiauth}.conf
+
+	if ! [ -z ${AD_ADMINROLES} ]; then
+		cp $RDECK_BASE/etc/adadmin.aclpolicy.template $RDECK_BASE/etc/adadmin.aclpolicy
+		sed -i "s/<AD_ADMINROLES>/${AD_ADMINROLES}/" $RDECK_BASE/etc/adadmin.aclpolicy
+	fi
 
 	if [ "${AD_MULTIAUTH}" == "true" ]; then
 		params="$params -Dloginmodule.conf.name=jaas-multiauth.conf "
