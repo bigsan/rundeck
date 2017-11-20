@@ -63,9 +63,21 @@ if [ ! -f "${initfile}" ]; then
 
 	function install_rundeck() {
 		echo "==> Installing rundeck"
-		java -jar $RDECK_JAR --installonly
+		cp /res/rundeck-launcher-${RUNDECK_VERSION}.jar $RDECK_JAR
+		java -jar $RDECK_JAR --installonly --basedir $RDECK_BASE
 		echo "${DEFAULT_ADMIN_USER:-admin}:${DEFAULT_ADMIN_PASSWORD:-admin},user,admin" > $realm_properties
 		echo "${DEFAULT_USER:-user}:${DEFAULT_PASSWORD:-user},user" >> $realm_properties
+		echo "==> Installing plugins"
+		mkdir -p $RDECK_BASE/libext
+		cp /res/plugin/rundeck-slack-incoming-webhook-plugin-0.6.jar $RDECK_BASE/libext/rundeck-slack-incoming-webhook-plugin-0.6.jar
+		cp /res/plugin/rd-winrm-plugin-1.5.1.zip $RDECK_BASE/libext/rd-winrm-plugin-1.5.1.zip
+		echo "==> Copying auth config & acl policy"
+		mkdir -p $RDECK_BASE/server/config
+		cp /res/conf/jaas-activedirectory.conf $RDECK_BASE/server/config/jaas-activedirectory.conf
+		cp /res/conf/jaas-multiauth.conf $RDECK_BASE/server/config/jaas-multiauth.conf
+		mkdir -p $RDECK_BASE/etc
+		cp /res/policy/user.aclpolicy $RDECK_BASE/etc/user.aclpolicy
+		cp /res/policy/adadmin.aclpolicy.template $RDECK_BASE/etc/adadmin.aclpolicy.template
 	}
 
 	function config_grails_url() {
@@ -229,7 +241,7 @@ if ! [ -z ${AD_HOST} ]; then
 	fi
 fi
 
-params="$params -jar $RDECK_JAR --skipinstall"
+params="$params -jar $RDECK_JAR --skipinstall --basedir $RDECK_BASE"
 
 # Setup completed, ready to start the server
 echo "STARTING RUNDECK >>>"
