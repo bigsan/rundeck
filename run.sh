@@ -70,7 +70,7 @@ if [ ! -f "${initfile}" ]; then
 		echo "==> Installing plugins"
 		mkdir -p $RDECK_BASE/libext
 		cp /res/plugin/rundeck-slack-incoming-webhook-plugin-0.6.jar $RDECK_BASE/libext/rundeck-slack-incoming-webhook-plugin-0.6.jar
-		cp /res/plugin/rd-winrm-plugin-1.5.1.zip $RDECK_BASE/libext/rd-winrm-plugin-1.5.1.zip
+		cp /res/plugin/rd-winrm-plugin-1.7.0.zip $RDECK_BASE/libext/rd-winrm-plugin-1.7.0.zip
 		echo "==> Copying auth config & acl policy"
 		mkdir -p $RDECK_BASE/server/config
 		cp /res/conf/jaas-activedirectory.conf $RDECK_BASE/server/config/jaas-activedirectory.conf
